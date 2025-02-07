@@ -23,10 +23,14 @@
       min-height: 100vh;
       text-align: center;
       padding: 20px;
+      position: relative; /* Necessario per il layering */
+      z-index: 2;
     }
     .container {
       opacity: 0;
       animation: fadeIn 1.5s ease-in-out forwards;
+      position: relative;
+      z-index: 3;
     }
     @keyframes fadeIn {
       to { opacity: 1; }
@@ -114,9 +118,8 @@
       width: 10px;
       height: 10px;
       border-radius: 50%;
-      /* Colore iniziale impostato via JavaScript */
+      background-color: #ff4081; /* colore iniziale impostato via JS */
       transform: translate(-50%, -50%);
-      /* Rimosso l'animazione CSS per il colore */
     }
     /* Creiamo 10 copie per ottenere una scia continua */
     .orbit-container:nth-child(1)  { animation-delay: 0s;   opacity: 1; }
@@ -138,6 +141,31 @@
       .clock { width: 150px; height: 150px; }
       .hand.second { height: 70px; }
       .moving-dot { left: 90px; }
+    }
+    /* Overlay circuito stampato stilizzato */
+    .circuit-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: url('https://www.toptal.com/designers/subtlepatterns/patterns/circuit-board.png') repeat;
+      background-size: cover;
+      pointer-events: none;
+      z-index: 1;
+      /* L'overlay parte con opacità zero, raggiunge il 75% e poi svanisce */
+      animation: fadeCircuit 20s ease-in-out infinite, moveCircuit 20s linear infinite;
+    }
+    @keyframes fadeCircuit {
+      0%   { opacity: 0; }
+      25%  { opacity: 0.75; }
+      75%  { opacity: 0.75; }
+      100% { opacity: 0; }
+    }
+    @keyframes moveCircuit {
+      0%   { transform: translate(0, 0); }
+      50%  { transform: translate(20px, 20px); }
+      100% { transform: translate(0, 0); }
     }
   </style>
 </head>
@@ -165,52 +193,8 @@
       </div>
     </div>
   </div>
-
-  <!-- Script per aggiornare il colore in modo randomico e a frequenza ridotta -->
-  <script>
-    const dots = document.querySelectorAll('.moving-dot');
-    const dotData = [];
-    const minDuration = 5; // Durata minima (in secondi) per la transizione del colore
-    const maxDuration = 8; // Durata massima (in secondi)
-    
-    // Inizializza per ogni pallino un oggetto con i parametri per il cambio colore
-    dots.forEach(dot => {
-      dotData.push({
-        currentHue: Math.random() * 360,
-        targetHue: Math.random() * 360,
-        elapsed: 0,
-        duration: minDuration + Math.random() * (maxDuration - minDuration)
-      });
-      // Imposta il colore iniziale
-      dot.style.backgroundColor = `hsl(${dotData[dotData.length - 1].currentHue}, 100%, 50%)`;
-    });
-    
-    let lastTimestamp;
-    function animateColors(timestamp) {
-      if (!lastTimestamp) lastTimestamp = timestamp;
-      const dt = (timestamp - lastTimestamp) / 1000; // dt in secondi
-      lastTimestamp = timestamp;
-      
-      dotData.forEach((data, i) => {
-        data.elapsed += dt;
-        if (data.elapsed >= data.duration) {
-          // Quando la transizione termina, aggiorna il colore corrente e imposta un nuovo target
-          data.currentHue = data.targetHue;
-          data.targetHue = Math.random() * 360;
-          data.elapsed = 0;
-          data.duration = minDuration + Math.random() * (maxDuration - minDuration);
-        }
-        const t = data.elapsed / data.duration;
-        // Interpolazione lineare tra currentHue e targetHue
-        let hue = data.currentHue + (data.targetHue - data.currentHue) * t;
-        hue = ((hue % 360) + 360) % 360;  // Assicura che hue rimanga nell'intervallo 0-360
-        dots[i].style.backgroundColor = `hsl(${hue}, 100%, 50%)`;
-      });
-      
-      requestAnimationFrame(animateColors);
-    }
-    
-    requestAnimationFrame(animateColors);
-  </script>
+  <!-- Overlay circuito stampato stilizzato -->
+  <div class="circuit-overlay"></div>
 </body>
 </html>
+
